@@ -3,17 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>APDCL DTR Load Balance</title>
+  <title>DTR BALANCE GESD</title>
+  
+  <!-- PWA Requirements -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e3a8a">
+  <link rel="apple-touch-icon" href="apdcl_logo.png">
+
   <style>
     :root {
       --bg: #f0f4f8;
       --card: #ffffff;
-      --apdcl-blue: #1e3a8a; /* Deep Corporate Blue */
-      --apdcl-orange: #ea580c; /* High-Vis Orange */
+      --apdcl-blue: #1e3a8a; 
+      --apdcl-orange: #ea580c; 
       --border: #cbd5e1;
       --text: #0f172a;
-      
-      /* Phase Colors */
       --phase-r: #ef4444; 
       --phase-y: #eab308; 
       --phase-b: #3b82f6; 
@@ -21,67 +25,44 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    
     body { background: var(--bg); color: var(--text); padding: 16px; padding-bottom: 80px; }
     .container { max-width: 600px; margin: 0 auto; }
     
-    /* Branded Header */
-    .header-banner { text-align: center; margin-bottom: 24px; padding-top: 10px; }
+    .header-banner { text-align: center; margin-bottom: 16px; padding-top: 10px; }
     .header-banner img { width: 90px; height: auto; margin-bottom: 12px; drop-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .header-banner h2 { color: var(--apdcl-blue); font-weight: 800; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .header-banner h2 { color: var(--apdcl-blue); font-weight: 800; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+
+    /* Install App Button */
+    .install-container { text-align: center; margin-bottom: 20px; }
+    .btn-install { background: var(--apdcl-orange); color: white; border: none; padding: 10px 24px; border-radius: 24px; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: none; margin: 0 auto; box-shadow: 0 4px 6px rgba(234, 88, 12, 0.3); text-transform: uppercase; letter-spacing: 1px; }
 
     .card { background: var(--card); padding: 24px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.06); border-top: 4px solid var(--apdcl-blue); position: relative; margin-bottom: 24px; z-index: 2; }
     
     label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 6px; color: var(--apdcl-blue); text-transform: uppercase; letter-spacing: 0.5px; }
     .input-hint { font-size: 0.75rem; color: var(--apdcl-orange); font-weight: 600; margin-top: -4px; margin-bottom: 8px; }
     
-    input[type="text"], input[type="number"], textarea {
-      width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 8px; font-size: 1.05rem; margin-bottom: 20px; outline: none; transition: 0.2s; background: #f8fafc;
-    }
+    input[type="text"], input[type="number"], textarea { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 8px; font-size: 1.05rem; margin-bottom: 20px; outline: none; transition: 0.2s; background: #f8fafc; }
     input:focus, textarea:focus { border-color: var(--apdcl-blue); background: #fff; box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1); }
 
-    /* The Balance Branch UI */
     .branch-connector { width: 4px; height: 30px; background-color: var(--apdcl-blue); margin: -24px auto 0 auto; z-index: 1; position: relative; }
     .branch-horizontal { width: 85%; height: 4px; background-color: var(--apdcl-blue); margin: 0 auto 0 auto; border-radius: 4px; }
-    
-    .balance-badge {
-      background: var(--apdcl-blue);
-      color: white;
-      font-weight: 800;
-      font-size: 0.9rem;
-      letter-spacing: 2px;
-      padding: 6px 20px;
-      border-radius: 20px;
-      text-align: center;
-      width: fit-content;
-      margin: -14px auto 20px auto;
-      position: relative;
-      z-index: 3;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
+    .balance-badge { background: var(--apdcl-blue); color: white; font-weight: 800; font-size: 0.9rem; letter-spacing: 2px; padding: 6px 20px; border-radius: 20px; text-align: center; width: fit-content; margin: -14px auto 20px auto; position: relative; z-index: 3; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
 
-    /* Phase Grid */
     .phase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 10px; }
     .phase-card { background: var(--card); padding: 16px; border-radius: 12px; border: 1px solid var(--border); text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.04); }
     .phase-card label { margin-bottom: 8px; font-size: 0.9rem; }
     .phase-card input { margin-bottom: 0; text-align: center; font-weight: 800; font-size: 1.15rem; background: #fff; border-width: 2px; }
     
-    .phase-r { border-top: 6px solid var(--phase-r); }
-    .phase-r input:focus { border-color: var(--phase-r); box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1); }
-    .phase-y { border-top: 6px solid var(--phase-y); }
-    .phase-y input:focus { border-color: var(--phase-y); box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1); }
-    .phase-b { border-top: 6px solid var(--phase-b); }
-    .phase-b input:focus { border-color: var(--phase-b); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-    .phase-n { border-top: 6px solid var(--phase-n); }
-    .phase-n input:focus { border-color: var(--phase-n); box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1); }
+    .phase-r { border-top: 6px solid var(--phase-r); } .phase-r input:focus { border-color: var(--phase-r); box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1); }
+    .phase-y { border-top: 6px solid var(--phase-y); } .phase-y input:focus { border-color: var(--phase-y); box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1); }
+    .phase-b { border-top: 6px solid var(--phase-b); } .phase-b input:focus { border-color: var(--phase-b); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+    .phase-n { border-top: 6px solid var(--phase-n); } .phase-n input:focus { border-color: var(--phase-n); box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1); }
 
-    /* Photo Upload */
     .file-upload { display: block; width: 100%; padding: 18px; border: 2px dashed var(--apdcl-orange); border-radius: 8px; text-align: center; cursor: pointer; background: #fff7ed; font-weight: 700; color: var(--apdcl-orange); margin-bottom: 16px; transition: 0.2s; }
     .file-upload:active { background: #ffedd5; }
     .file-upload input { display: none; }
     #imagePreview { width: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: none; margin-bottom: 16px; border: 2px solid var(--border); }
 
-    /* Submit Button */
     .btn-submit { width: 100%; padding: 18px; background-color: var(--apdcl-blue); color: white; border: none; border-radius: 8px; font-size: 1.15rem; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 6px 12px rgba(30, 58, 138, 0.25); text-transform: uppercase; letter-spacing: 1px; }
     .btn-submit:active { transform: scale(0.98); box-shadow: 0 2px 4px rgba(30, 58, 138, 0.2); }
     .btn-submit:disabled { background-color: #94a3b8; cursor: not-allowed; box-shadow: none; }
@@ -92,30 +73,29 @@
 <div class="container">
   
   <div class="header-banner">
-    <!-- Official APDCL Logo (Local) -->
     <img src="apdcl_logo.png" alt="APDCL Logo">
-    <h2>DTR Load Logger</h2>
+    <h2>DTR BALANCE GESD</h2>
   </div>
 
-  <!-- LEVEL 1: THE SOURCE -->
+  <!-- Install Button Container -->
+  <div class="install-container">
+    <button id="installBtn" class="btn-install">📲 INSTALL APP</button>
+  </div>
+
   <div class="card">
     <label for="dtrSelect">1. DTR Selection</label>
     <input type="text" id="dtrSelect" list="dtrList" placeholder="Search DTR No or Name..." required>
-    <datalist id="dtrList">
-      <!-- Options injected by JavaScript -->
-    </datalist>
+    <datalist id="dtrList"></datalist>
 
     <label for="meterNo">2. DTR Meter Number</label>
     <div class="input-hint">MANDATORY: If no meter is attached, type 000</div>
     <input type="text" id="meterNo" placeholder="Enter Meter No or 000" required>
   </div>
 
-  <!-- VISUAL BRANCHING (BALANCE HEADER) -->
   <div class="branch-connector"></div>
   <div class="branch-horizontal"></div>
   <div class="balance-badge">BALANCE</div>
 
-  <!-- LEVEL 2: THE PHASES -->
   <div class="phase-grid">
     <div class="phase-card phase-r">
       <label style="color: var(--phase-r);">R Phase</label>
@@ -137,7 +117,6 @@
 
   <div class="branch-connector" style="height: 24px; margin-top:0;"></div>
 
-  <!-- LEVEL 3: DOCUMENTATION -->
   <div class="card" style="border-top: 4px solid var(--apdcl-orange);">
     <label for="remarks">3. Remarks / Observations</label>
     <textarea id="remarks" rows="3" placeholder="Note any visual damage, oil leaks, or unbalanced loads here..."></textarea>
@@ -155,9 +134,34 @@
 
 <script>
   // ==========================================
-  // CONFIGURATION
+  // CONFIGURATION & PWA LOGIC
   // ==========================================
-  const API_URL = "https://script.google.com/macros/s/AKfycbzgS9F8iMC-OxeBLRMHYYC79dKPrYmGl0RXsAVvIn1DnKmGLZmBbwqPwTFpOLohI0mz/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbzgS9F8iMC-OxeBLRMHYYC79dKPrYmGl0RXsAVvIn1DnKmGLZmBbwqPwTFpOLohI0mz/exec"; 
+
+  // PWA Registration & Install Button Logic
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(console.error);
+  }
+
+  let deferredPrompt;
+  const installBtn = document.getElementById('installBtn');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'block'; // Show button when ready
+  });
+
+  installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        installBtn.style.display = 'none'; // Hide if installed
+      }
+      deferredPrompt = null;
+    }
+  });
 
   const dtrDatabase = [
     "104-CHAHARIA UJANPARA 25 KVA",
@@ -1384,7 +1388,6 @@
 
   let compressedBase64 = null;
 
-  // Populate Dropdown
   const datalist = document.getElementById('dtrList');
   dtrDatabase.forEach(dtr => {
     const option = document.createElement('option');
@@ -1441,7 +1444,6 @@
     const phaseY = document.getElementById('phaseY').value;
     const phaseB = document.getElementById('phaseB').value;
     
-    // Strict Validation
     if (!dtrNo) { alert("Please select a DTR."); return; }
     if (!meterNo) { alert("Meter Number is mandatory. Type 000 if no meter."); return; }
     if (!phaseR || !phaseY || !phaseB) { alert("Please enter the loads for R, Y, and B phases."); return; }
@@ -1452,9 +1454,9 @@
 
     const payload = {
       dtrNo: dtrNo,
-      meterAttached: meterNo === "000" ? "No" : "Yes", // Auto-determines status based on 000 rule
+      meterAttached: meterNo === "000" ? "No" : "Yes", 
       meterNo: meterNo,
-      totalLoad: "N/A", // Sends N/A so your Google Sheet columns stay perfectly aligned
+      totalLoad: "N/A",
       phaseR: phaseR,
       phaseY: phaseY,
       phaseB: phaseB,

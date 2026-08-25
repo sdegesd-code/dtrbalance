@@ -13,10 +13,10 @@
       --text: #0f172a;
       
       /* Phase Colors */
-      --phase-r: #ef4444; /* Red */
-      --phase-y: #eab308; /* Yellow */
-      --phase-b: #3b82f6; /* Blue */
-      --phase-n: #64748b; /* Neutral (Grey) */
+      --phase-r: #ef4444; 
+      --phase-y: #eab308; 
+      --phase-b: #3b82f6; 
+      --phase-n: #64748b; 
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -28,22 +28,8 @@
 
     .card { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border); position: relative; margin-bottom: 20px; z-index: 2; }
     
-    /* The Branch Connecting Lines */
-    .branch-connector {
-      width: 4px;
-      height: 30px;
-      background-color: var(--primary);
-      margin: -20px auto 0 auto;
-      z-index: 1;
-      position: relative;
-    }
-    .branch-horizontal {
-      width: 80%;
-      height: 4px;
-      background-color: var(--primary);
-      margin: 0 auto 20px auto;
-      border-radius: 4px;
-    }
+    .branch-connector { width: 4px; height: 30px; background-color: var(--primary); margin: -20px auto 0 auto; z-index: 1; position: relative; }
+    .branch-horizontal { width: 80%; height: 4px; background-color: var(--primary); margin: 0 auto 20px auto; border-radius: 4px; }
 
     label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; }
     
@@ -56,36 +42,36 @@
     .checkbox-group { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; background: #e0e7ff; padding: 12px; border-radius: 8px; cursor: pointer; border: 1px solid #c7d2fe; }
     .checkbox-group input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--primary); }
     .checkbox-group label { margin: 0; color: var(--primary); font-size: 1rem; cursor: pointer; }
-    
-    #meterNoGroup {
-      display: none; /* Hidden by default, shown via JS */
-      animation: slideDown 0.3s ease;
+    #meterNoGroup { display: none; animation: slideDown 0.3s ease; }
+
+    /* Total Load Readout */
+    .total-readout {
+      background-color: #f8fafc;
+      border: 2px dashed var(--primary) !important;
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 1.25rem !important;
+      text-align: center;
     }
 
     /* Phase Grid */
     .phase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    
     .phase-card { background: var(--card); padding: 16px; border-radius: 12px; border: 2px solid var(--border); text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     .phase-card input { margin-bottom: 0; text-align: center; font-weight: bold; font-size: 1.1rem; }
     
     .phase-r { border-top: 6px solid var(--phase-r); }
     .phase-r label { color: var(--phase-r); }
-    
     .phase-y { border-top: 6px solid var(--phase-y); }
     .phase-y label { color: var(--phase-y); }
-    
     .phase-b { border-top: 6px solid var(--phase-b); }
     .phase-b label { color: var(--phase-b); }
-    
     .phase-n { border-top: 6px solid var(--phase-n); }
     .phase-n label { color: var(--phase-n); }
 
-    /* Photo Upload */
     .file-upload { display: block; width: 100%; padding: 16px; border: 2px dashed var(--primary); border-radius: 8px; text-align: center; cursor: pointer; background: #eff6ff; font-weight: 600; color: var(--primary); margin-bottom: 16px; }
     .file-upload input { display: none; }
     #imagePreview { width: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: none; margin-bottom: 16px; }
 
-    /* Submit Button */
     .btn-submit { width: 100%; padding: 16px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(30, 64, 175, 0.3); }
     .btn-submit:active { transform: scale(0.98); }
     .btn-submit:disabled { background-color: #94a3b8; cursor: not-allowed; }
@@ -116,8 +102,8 @@
       <input type="text" id="meterNo" placeholder="Enter Field Meter No">
     </div>
 
-    <label for="totalLoad">Total Load / Balance (Amps)</label>
-    <input type="number" step="0.1" id="totalLoad" placeholder="e.g. 150.5" required>
+    <label for="totalLoad">Total Load (Amps) - Auto Calculated</label>
+    <input type="text" id="totalLoad" class="total-readout" placeholder="0.0" readonly>
   </div>
 
   <!-- VISUAL BRANCHING -->
@@ -128,15 +114,15 @@
   <div class="phase-grid">
     <div class="phase-card phase-r">
       <label>R Phase</label>
-      <input type="number" step="0.1" id="phaseR" placeholder="Amps" required>
+      <input type="number" step="0.1" id="phaseR" placeholder="Amps" oninput="calculateTotal()" required>
     </div>
     <div class="phase-card phase-y">
       <label>Y Phase</label>
-      <input type="number" step="0.1" id="phaseY" placeholder="Amps" required>
+      <input type="number" step="0.1" id="phaseY" placeholder="Amps" oninput="calculateTotal()" required>
     </div>
     <div class="phase-card phase-b">
       <label>B Phase</label>
-      <input type="number" step="0.1" id="phaseB" placeholder="Amps" required>
+      <input type="number" step="0.1" id="phaseB" placeholder="Amps" oninput="calculateTotal()" required>
     </div>
     <div class="phase-card phase-n">
       <label>Neutral</label>
@@ -168,7 +154,6 @@
   // ==========================================
   const API_URL = "https://script.google.com/macros/s/AKfycbzgS9F8iMC-OxeBLRMHYYC79dKPrYmGl0RXsAVvIn1DnKmGLZmBbwqPwTFpOLohI0mz/exec";
 
-  // Replace this array with your actual 1221 DTRs
   const dtrDatabase = [
     "104-CHAHARIA UJANPARA 25 KVA",
 "105-KHARMUZA CHAR",
@@ -1392,12 +1377,8 @@
 "A02D-BOROBAZAR MATHAURI RIVER SIDE"
   ];
 
-  // ==========================================
-  // INITIALIZATION
-  // ==========================================
   let compressedBase64 = null;
 
-  // Populate DTR Dropdown
   const datalist = document.getElementById('dtrList');
   dtrDatabase.forEach(dtr => {
     const option = document.createElement('option');
@@ -1405,17 +1386,27 @@
     datalist.appendChild(option);
   });
 
-  // Toggle Meter Field
   function toggleMeterField() {
     const isChecked = document.getElementById('meterAttached').checked;
     const meterGroup = document.getElementById('meterNoGroup');
     meterGroup.style.display = isChecked ? 'block' : 'none';
-    if (!isChecked) document.getElementById('meterNo').value = ""; // Clear if unchecked
+    if (!isChecked) document.getElementById('meterNo').value = ""; 
   }
 
   // ==========================================
-  // IMAGE COMPRESSION (For Mobile Networks)
+  // AUTO-CALCULATION LOGIC
   // ==========================================
+  function calculateTotal() {
+    const r = parseFloat(document.getElementById('phaseR').value) || 0;
+    const y = parseFloat(document.getElementById('phaseY').value) || 0;
+    const b = parseFloat(document.getElementById('phaseB').value) || 0;
+    
+    // Sums R, Y, and B (Neutral is excluded from total load capacity math)
+    const total = r + y + b;
+    
+    document.getElementById('totalLoad').value = total > 0 ? total.toFixed(1) : "0.0";
+  }
+
   function previewAndCompressImage(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -1426,7 +1417,6 @@
     reader.onload = function(e) {
       const img = new Image();
       img.onload = function() {
-        // Create Canvas to resize image
         const canvas = document.createElement('canvas');
         const MAX_WIDTH = 1024;
         const MAX_HEIGHT = 1024;
@@ -1444,7 +1434,6 @@
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Compress to JPEG at 70% quality
         compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
         preview.src = compressedBase64;
         preview.style.display = 'block';
@@ -1454,16 +1443,12 @@
     reader.readAsDataURL(file);
   }
 
-  // ==========================================
-  // SUBMISSION LOGIC
-  // ==========================================
   async function submitData() {
     const dtrNo = document.getElementById('dtrSelect').value;
     const totalLoad = document.getElementById('totalLoad').value;
     
-    // Basic Validation
-    if (!dtrNo || !totalLoad) {
-      alert("Please fill in the DTR Selection and Total Load.");
+    if (!dtrNo || totalLoad === "0.0" || totalLoad === "") {
+      alert("Please select a DTR and ensure phase loads are entered.");
       return;
     }
 
@@ -1494,7 +1479,7 @@
       
       if (result.status === "success") {
         alert("✅ DTR Report logged successfully!");
-        window.location.reload(); // Refresh form for the next DTR
+        window.location.reload(); 
       } else {
         alert("❌ Error: " + result.message);
         btn.disabled = false;

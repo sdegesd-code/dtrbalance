@@ -32,7 +32,6 @@
     .header-banner img { width: 90px; height: auto; margin-bottom: 12px; drop-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     .header-banner h2 { color: var(--apdcl-blue); font-weight: 800; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
 
-    /* Install App Button */
     .install-container { text-align: center; margin-bottom: 20px; }
     .btn-install { background: var(--apdcl-orange); color: white; border: none; padding: 10px 24px; border-radius: 24px; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: none; margin: 0 auto; box-shadow: 0 4px 6px rgba(234, 88, 12, 0.3); text-transform: uppercase; letter-spacing: 1px; }
 
@@ -41,7 +40,7 @@
     label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 6px; color: var(--apdcl-blue); text-transform: uppercase; letter-spacing: 0.5px; }
     .input-hint { font-size: 0.75rem; color: var(--apdcl-orange); font-weight: 600; margin-top: -4px; margin-bottom: 8px; }
     
-    input[type="text"], input[type="number"], textarea { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 8px; font-size: 1.05rem; margin-bottom: 20px; outline: none; transition: 0.2s; background: #f8fafc; }
+    input[type="text"], input[type="number"], textarea, input[type="email"] { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 8px; font-size: 1.05rem; margin-bottom: 20px; outline: none; transition: 0.2s; background: #f8fafc; }
     input:focus, textarea:focus { border-color: var(--apdcl-blue); background: #fff; box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1); }
 
     .branch-connector { width: 4px; height: 30px; background-color: var(--apdcl-blue); margin: -24px auto 0 auto; z-index: 1; position: relative; }
@@ -77,18 +76,21 @@
     <h2>DTR BALANCE GESD</h2>
   </div>
 
-  <!-- Install Button Container -->
   <div class="install-container">
     <button id="installBtn" class="btn-install">📲 INSTALL APP</button>
   </div>
 
   <div class="card">
-    <label for="dtrSelect">1. DTR Selection</label>
+    <label for="workerName">1. Submitter Details (Optional)</label>
+    <input type="text" id="workerName" autocomplete="name" placeholder="Enter your Name or Worker ID">
+
+    <label for="dtrSelect">2. DTR Selection (MANDATORY)</label>
+    <div class="input-hint">Must select an exact match from the dropdown list.</div>
     <input type="text" id="dtrSelect" list="dtrList" placeholder="Search DTR No or Name..." required>
     <datalist id="dtrList"></datalist>
 
-    <label for="meterNo">2. DTR Meter Number</label>
-    <div class="input-hint">MANDATORY: If no meter is attached, type 000</div>
+    <label for="meterNo">3. DTR Meter Number (MANDATORY)</label>
+    <div class="input-hint">If no meter is attached, you must type 000</div>
     <input type="text" id="meterNo" placeholder="Enter Meter No or 000" required>
   </div>
 
@@ -118,15 +120,15 @@
   <div class="branch-connector" style="height: 24px; margin-top:0;"></div>
 
   <div class="card" style="border-top: 4px solid var(--apdcl-orange);">
-    <label for="remarks">3. Remarks / Observations</label>
-    <textarea id="remarks" rows="3" placeholder="Note any visual damage, oil leaks, or unbalanced loads here..."></textarea>
-
-    <label>4. DTR Panel Photo</label>
+    <label>4. DTR Panel Photo (MANDATORY)</label>
     <label class="file-upload">
       📸 TAP TO TAKE PHOTO
-      <input type="file" id="photoInput" accept="image/*" capture="environment" onchange="previewAndCompressImage(event)">
+      <input type="file" id="photoInput" accept="image/*" capture="environment" onchange="previewAndCompressImage(event)" required>
     </label>
     <img id="imagePreview" alt="Photo Preview">
+
+    <label for="remarks">5. Remarks / Observations</label>
+    <textarea id="remarks" rows="3" placeholder="Note any visual damage, oil leaks, or unbalanced loads here..."></textarea>
 
     <button type="button" class="btn-submit" id="submitBtn" onclick="submitData()">Upload Report</button>
   </div>
@@ -138,7 +140,6 @@
   // ==========================================
   const API_URL = "https://script.google.com/macros/s/AKfycbzgS9F8iMC-OxeBLRMHYYC79dKPrYmGl0RXsAVvIn1DnKmGLZmBbwqPwTFpOLohI0mz/exec"; 
 
-  // PWA Registration & Install Button Logic
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(console.error);
   }
@@ -149,20 +150,19 @@
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    installBtn.style.display = 'block'; // Show button when ready
+    installBtn.style.display = 'block'; 
   });
 
   installBtn.addEventListener('click', async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        installBtn.style.display = 'none'; // Hide if installed
-      }
+      if (outcome === 'accepted') { installBtn.style.display = 'none'; }
       deferredPrompt = null;
     }
   });
 
+  // PASTE YOUR 1,221 DTRs HERE!
   const dtrDatabase = [
     "104-CHAHARIA UJANPARA 25 KVA",
 "105-KHARMUZA CHAR",
@@ -1435,22 +1435,50 @@
   }
 
   // ==========================================
-  // SUBMISSION LOGIC
+  // SUBMISSION LOGIC (WITH STRICT VALIDATION)
   // ==========================================
   async function submitData() {
-    const dtrNo = document.getElementById('dtrSelect').value;
+    const workerName = document.getElementById('workerName').value.trim();
+    const dtrNo = document.getElementById('dtrSelect').value.trim();
     const meterNo = document.getElementById('meterNo').value.trim();
     const phaseR = document.getElementById('phaseR').value;
     const phaseY = document.getElementById('phaseY').value;
     const phaseB = document.getElementById('phaseB').value;
+    const neutral = document.getElementById('neutral').value;
     
-    if (!dtrNo) { alert("Please select a DTR."); return; }
-    if (!meterNo) { alert("Meter Number is mandatory. Type 000 if no meter."); return; }
-    if (!phaseR || !phaseY || !phaseB) { alert("Please enter the loads for R, Y, and B phases."); return; }
+    // STRICT VALIDATION 1: Must be from the predefined list
+    if (!dtrDatabase.includes(dtrNo)) { 
+      alert("❌ INVALID DTR: You must select a valid DTR from the dropdown list. Please search and click an option."); 
+      return; 
+    }
+    
+    // STRICT VALIDATION 2: Must enter a meter number
+    if (!meterNo) { 
+      alert("❌ METER NUMBER REQUIRED: Type 000 if no meter is attached."); 
+      return; 
+    }
+    
+    // STRICT VALIDATION 3: All phase fields must be filled
+    if (phaseR === "" || phaseY === "" || phaseB === "" || neutral === "") { 
+      alert("❌ MISSING LOADS: Please enter the loads for R, Y, B, and Neutral phases."); 
+      return; 
+    }
+
+    // STRICT VALIDATION 4: Photo is absolutely mandatory
+    if (!compressedBase64) {
+      alert("📸 PHOTO REQUIRED: You must tap to take a photo of the DTR panel before submitting.");
+      return;
+    }
 
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
     btn.innerText = "⏳ UPLOADING...";
+
+    // Append worker name to remarks if provided so it shows in your sheet
+    let finalRemarks = document.getElementById('remarks').value;
+    if (workerName) {
+      finalRemarks = `[Submitter: ${workerName}] ` + finalRemarks;
+    }
 
     const payload = {
       dtrNo: dtrNo,
@@ -1460,8 +1488,8 @@
       phaseR: phaseR,
       phaseY: phaseY,
       phaseB: phaseB,
-      neutral: document.getElementById('neutral').value,
-      remarks: document.getElementById('remarks').value,
+      neutral: neutral,
+      remarks: finalRemarks,
       photoBase64: compressedBase64
     };
 
